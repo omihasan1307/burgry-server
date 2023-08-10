@@ -7,12 +7,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const jwt = require("jsonwebtoken");
 const SSLCommerzPayment = require("sslcommerz-lts");
 const admin = require("firebase-admin");
-
 const serviceAccount = require("./serviceAccountKey.json");
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
 
 const store_id = process.env.STOREDID;
 const store_passwd = process.env.STOREDPASS;
@@ -21,16 +16,17 @@ const is_live = false;
 app.use(cors());
 app.use(express.json());
 
-const uri = `mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASS}@cluster0.9nztkwc.mongodb.net/?retryWrites=true&w=majority`;
-
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  },
-});
+const client = new MongoClient(
+  `mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASS}@cluster0.9nztkwc.mongodb.net/?retryWrites=true&w=majority`,
+  {
+    serverApi: {
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors: true,
+    },
+  }
+);
 
 const unauthorizedMessage = { status: 401, message: "unauthorized Access" };
 const forbidenMessage = { status: 403, message: "forbiden Access" };
@@ -50,6 +46,10 @@ const jwtVerify = (req, res, next) => {
     res.status(401).send(unauthorizedMessage);
   }
 };
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
 async function run() {
   try {
