@@ -52,13 +52,17 @@ const jwtVerify = (req, res, next) => {
 };
 
 async function run() {
-  const userListCollection = client.db("burgLyf").collection("userList");
-  const itemListCollection = client.db("burgLyf").collection("itemList");
-  const cartListCollection = client.db("burgLyf").collection("cartList");
-  const orderListCollection = client.db("burgLyf").collection("orderList");
-
   try {
     await client.connect();
+    await client.db("admin").command({ ping: 1 });
+    console.log(
+      "Pinged your deployment. You successfully connected to MongoDB!"
+    );
+
+    const userListCollection = client.db("burgLyf").collection("userList");
+    const itemListCollection = client.db("burgLyf").collection("itemList");
+    const cartListCollection = client.db("burgLyf").collection("cartList");
+    const orderListCollection = client.db("burgLyf").collection("orderList");
 
     app.post("/jwt", (req, res) => {
       const data = req.body;
@@ -319,10 +323,10 @@ async function run() {
           total_amount: body.totalPrice,
           currency: "BDT",
           tran_id: transId, // use unique tran_id for each api call
-          success_url: `http://localhost:5000/paymentSuccess/${transId}?uid=${body.userId}`,
-          fail_url: "http://localhost:5000/cancel-payment",
-          cancel_url: "http://localhost:5000/cancel-payment",
-          ipn_url: "http://localhost:5000/ipn",
+          success_url: `https://burgry-server.vercel.app/paymentSuccess/${transId}?uid=${body.userId}`,
+          fail_url: "https://burgry-server.vercel.app/cancel-payment",
+          cancel_url: "https://burgry-server.vercel.app/cancel-payment",
+          ipn_url: "https://burgry-server.vercel.app/ipn",
           shipping_method: "Courier",
           product_name: "Computer.",
           product_category: "Electronic",
@@ -395,20 +399,16 @@ async function run() {
       await cartListCollection.deleteMany({
         _id: { $in: result.map((e) => new ObjectId(e._id)) },
       });
-      res.redirect(`http://localhost:5173/paymentSuccess/${req.params.id}`);
+      res.redirect(`https://burglyf.web.app/paymentSuccess/${req.params.id}`);
     });
 
     app.post("/cancel-payment", (req, res) => {
-      res.redirect(`http://localhost:5173/customerDashboard/cart`);
+      res.redirect(`https://burglyf.web.app/customerDashboard/cart`);
     });
 
     // Connect the client to the server	(optional starting in v4.7)
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
